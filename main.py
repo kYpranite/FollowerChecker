@@ -1,18 +1,18 @@
 from instagrapi import Client
+import configparser
 
-USERNAME = "USERNAME_HERE"
-PASSWORD = "PASSWORD_HERE"
+parser = configparser.ConfigParser()
+parser.read("config.txt")
 
+USERNAME = parser["Account"]["username"]
+PASSWORD = parser["Account"]["password"]
 
 cl = Client()
 cl.login(USERNAME, PASSWORD)
 userId = cl.user_id
 
-followers = cl.user_followers_v1(userId, 0)
-following = cl.user_following_v1(userId, 0)
-
-followersList = [user.username for user in followers]
-followingList = [user.username for user in following]
+followersList = [user.username for user in cl.user_followers_v1(userId, 0)]
+followingList = [user.username for user in cl.user_following_v1(userId, 0)]
 
 result = set(followingList) - set(followersList)
 
@@ -27,5 +27,5 @@ for username in result:
     print("https://www.instagram.com/" + username + "/")
     response = input()
     if response.upper() == "Y":
-        bitch = cl.user_info_by_username(username).dict()
-        cl.user_unfollow(bitch["pk"])
+        user = cl.user_info_by_username(username).dict()
+        cl.user_unfollow(user["pk"])
